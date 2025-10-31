@@ -15,12 +15,10 @@ jobs:
     
     steps:
       - name: ⬇️ Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         
-      - name: 🛠️ Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
+      - name: 🛠️ Setup Deno 2
+        uses: denoland/setup-deno@v2
 
       - name: 🧹 Get Version from Tag
         id: get_version
@@ -30,6 +28,16 @@ jobs:
           VERSION=$(echo $TAG | sed 's/^v//')
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         
+
+      - name: Set version in Deno
+        uses: maks11060/deno-publish-version@v2
+        with:
+          # Default: [deno.jsonc|deno.json|jsr.json|package.json]
+          config-file:
+          # Default: ${{ steps.get_version.outputs.VERSION }} 'v1.2.3' or '1.2.3'
+          tag:
+
+
       - name: 🚀 Publish to JSR
         # Use the version extracted from the tag
         run: |
