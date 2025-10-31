@@ -1,0 +1,14 @@
+{
+  // Enable Deno for the workspace
+  "deno.enable": true,
+  // Use the Deno formatter for supported files
+  "[typescript]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "denoland.vscode-deno"
+  },
+  "editor.formatOnSave": true,
+  // Prevent other formatters from conflicting
+  "eslint.format.enable": false
+}
