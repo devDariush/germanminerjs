@@ -18,8 +18,8 @@ export type TClientOptions = {
 export class GMClient {
   readonly #apiKey: string;
 
-  readonly DEBUG: boolean = false;
-  readonly LAZY: boolean = false;
+  public readonly DEBUG: boolean = false;
+  public readonly LAZY: boolean = false;
 
   // Count request limit cache
   #REQ_LIMIT: number = 0;
@@ -63,7 +63,7 @@ export class GMClient {
    * @param lazyMode If set to true, the client will save on API requests wherever possible. Some data might be missing, so you have to load them manually (see documentation).
    * @param debugMode If set to true, the client will produce more logs for debug purposes. If not set, it will check in environment variables or set to false.
    */
-  static async create(options?: TClientOptions) {
+  static async create(options?: TClientOptions): Promise<GMClient> {
     const client = new GMClient(options);
 
     // Before creating the client,
@@ -86,6 +86,7 @@ export class GMClient {
    * @returns Gives you the number of requests that are currently remaining.
    */
   getRemainingRequests(): number {
+    this.refreshCache();
     return this.#REQ_LIMIT - this.#requestCount;
   }
 

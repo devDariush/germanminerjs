@@ -8,15 +8,21 @@ const accountTypes = ["Privatkonto", "Firma"] as const;
 type BankAccountType = (typeof accountTypes)[number];
 type PlayerType = Player | string;
 
-export const BankAccountSchema = z.object({
+export type BankAccountData = {
+  accountNumber: string;
+  balance: number;
+  accountType: BankAccountType;
+  bearer: string;
+};
+
+export const BankAccountSchema: z.ZodType<BankAccountData> = z.object({
   accountNumber: z.string(),
   balance: z.number(),
   accountType: z.enum(accountTypes),
   bearer: z.string(),
 });
-type BankAccountSchema = z.infer<typeof BankAccountSchema>;
 
-export class BankAccount implements Loadable {
+export class BankAccount implements Loadable<BankAccount> {
   readonly accountNumber: string;
   balance?: number;
   accountType?: BankAccountType;
@@ -38,7 +44,7 @@ export class BankAccount implements Loadable {
     return bankAccount;
   }
 
-  static _fromSchema(schema: BankAccountSchema, ctx: ApiContext): BankAccount {
+  static _fromSchema(schema: BankAccountData, ctx: ApiContext): BankAccount {
     return new BankAccount(
       schema.accountNumber,
       ctx,

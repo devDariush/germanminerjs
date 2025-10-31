@@ -37,7 +37,8 @@ function buildQuery(
   return url;
 }
 
-export async function fetchData(options: TFetchOptions) {
+// deno-lint-ignore no-explicit-any
+export async function fetchData(options: TFetchOptions): Promise<any> {
   const { ctx, endpoint, params, baseUrl } = options;
 
   const url = buildQuery(
