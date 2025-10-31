@@ -1,0 +1,49 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Deno (common local DENO_DIR or project-local cache)
+/.deno
+/.cache/deno
+
+# Build / output
+/dist/
+/build/
+/out/
+/coverage/
+/coverage-final.json
+coverage/*.lcov
+
+# TypeScript
+*.tsbuildinfo
+
+# Node (if using node tools alongside Deno)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Lockfiles (uncomment if you DON'T want to track them)
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
+
+# Env files
+.env
+.env.*.local
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
+
+# Logs
+*.log
+
+# Misc
+Thumbs.db
