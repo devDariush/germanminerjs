@@ -26,9 +26,8 @@ function buildQuery(
   url.searchParams.append("key", apiKey);
 
   if (params) {
-    const keys = Object.keys(params);
-    for (const key in keys) {
-      url.searchParams.append(key, params[key]);
+    for (const [key, value] of Object.entries(params)) {
+      url.searchParams.append(key, value);
     }
   }
 

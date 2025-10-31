@@ -1,7 +1,6 @@
 import * as z from "@zod/zod";
 
 import type { ApiContext } from "../../client.ts";
-import type { Loadable } from "../loadable.ts";
 import type { Player } from "./player.ts";
 
 const accountTypes = ["Privatkonto", "Firma"] as const;
@@ -22,7 +21,7 @@ export const BankAccountSchema: z.ZodType<BankAccountData> = z.object({
   bearer: z.string(),
 });
 
-export class BankAccount implements Loadable<BankAccount> {
+export class BankAccount {
   readonly accountNumber: string;
   balance?: number;
   accountType?: BankAccountType;
@@ -36,8 +35,8 @@ export class BankAccount implements Loadable<BankAccount> {
   ): Promise<BankAccount> {
     const bankAccount = new BankAccount(accountNumber, ctx);
 
-    if (ctx.lazy === false) {
-      const bankAccountLoaded = await bankAccount.load();
+    if (ctx.lazy == false) {
+      const bankAccountLoaded = await bankAccount._load();
       return bankAccountLoaded;
     }
 
@@ -69,7 +68,7 @@ export class BankAccount implements Loadable<BankAccount> {
     if (bearer) this.bearer = bearer;
   }
 
-  async load(): Promise<BankAccount> {
+  private async _load(): Promise<BankAccount> {
     await this.#ctx.handleOperation();
 
     const params = { "accountNumber": this.accountNumber };
@@ -91,6 +90,14 @@ export class BankAccount implements Loadable<BankAccount> {
     }
 
     return this;
+  }
+
+  async load(): Promise<void> {
+    const bankAccountLoaded = await this._load();
+    const { balance, accountType, bearer } = bankAccountLoaded;
+    this.balance = balance;
+    this.accountType = accountType;
+    this.bearer = bearer;
   }
 }
 

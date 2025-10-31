@@ -101,11 +101,11 @@ export class GMClient {
       if (this.isLimitReached()) {
         throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
       }
-    }
-    if (this.DEBUG) {
-      console.debug(
-        `${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`,
-      );
+      if (this.DEBUG) {
+        console.debug(
+          `${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`,
+        );
+      }
     }
   }
 
