@@ -12,6 +12,6 @@ export class LimitReachedError extends Error {
 
     // Fix prototype chain for ES5/ES6 compatibility (important for 'instanceof')
     // This line is often necessary when extending built-in classes in TypeScript
-    Object.setPrototypeOf(this, LimitReachedError.prototype); 
+    Object.setPrototypeOf(this, LimitReachedError.prototype);
   }
 }

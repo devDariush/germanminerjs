@@ -3,11 +3,11 @@ export class Player {
   uuid?: string;
 
   constructor(playerName?: string, uuid?: string) {
-    if(playerName) {
+    if (playerName) {
       this.playerName = playerName;
     }
 
-    if(uuid) {
+    if (uuid) {
       this.uuid = uuid;
     }
   }

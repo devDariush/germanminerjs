@@ -26,11 +26,11 @@ export class BankAccount implements Loadable {
 
   static async _create(
     accountNumber: string,
-    ctx: ApiContext
+    ctx: ApiContext,
   ): Promise<BankAccount> {
     const bankAccount = new BankAccount(accountNumber, ctx);
 
-    if(ctx.lazy === false) {
+    if (ctx.lazy === false) {
       const bankAccountLoaded = await bankAccount.load();
       return bankAccountLoaded;
     }
@@ -39,7 +39,13 @@ export class BankAccount implements Loadable {
   }
 
   static _fromSchema(schema: BankAccountSchema, ctx: ApiContext): BankAccount {
-    return new BankAccount(schema.accountNumber, ctx, schema.balance, schema.accountType, schema.bearer);
+    return new BankAccount(
+      schema.accountNumber,
+      ctx,
+      schema.balance,
+      schema.accountType,
+      schema.bearer,
+    );
   }
 
   private constructor(
@@ -47,14 +53,14 @@ export class BankAccount implements Loadable {
     ctx: ApiContext,
     balance?: number,
     accountType?: BankAccountType,
-    bearer?: PlayerType
+    bearer?: PlayerType,
   ) {
     this.accountNumber = accountNumber;
     this.#ctx = ctx;
 
-    if(balance) this.balance = balance;
-    if(accountType) this.accountType = accountType;
-    if(bearer) this.bearer = bearer;
+    if (balance) this.balance = balance;
+    if (accountType) this.accountType = accountType;
+    if (bearer) this.bearer = bearer;
   }
 
   async load(): Promise<BankAccount> {
@@ -64,7 +70,7 @@ export class BankAccount implements Loadable {
     const data = await this.#ctx.fetchData({
       ctx: this.#ctx,
       endpoint: "bank/info",
-      params: params
+      params: params,
     });
 
     const result = await BankAccountSchema.parseAsync(data["account"]);
@@ -72,7 +78,11 @@ export class BankAccount implements Loadable {
     this.accountType = result.accountType;
     this.bearer = result.bearer;
 
-    if(this.#ctx.debug) console.debug(`BankAccountSchema successfully validated: ${JSON.stringify(result)}`);
+    if (this.#ctx.debug) {
+      console.debug(
+        `BankAccountSchema successfully validated: ${JSON.stringify(result)}`,
+      );
+    }
 
     return this;
   }
@@ -97,14 +107,14 @@ export class BankService {
     // various keys (e.g. `accounts`, `list`, `data`). Be defensive and accept
     // both shapes to avoid runtime "data is not iterable" errors.
     let items: unknown[] = [];
-    if(Array.isArray(data)) {
+    if (Array.isArray(data)) {
       items = data as unknown[];
-    } else if(data && typeof data === "object") {
+    } else if (data && typeof data === "object") {
       const maybe = data as Record<string, unknown>;
-      if(Array.isArray(maybe.accounts)) items = maybe.accounts as unknown[];
-      else if(Array.isArray(maybe.list)) items = maybe.list as unknown[];
-      else if(Array.isArray(maybe.results)) items = maybe.results as unknown[];
-      else if(Array.isArray(maybe.data)) items = maybe.data as unknown[];
+      if (Array.isArray(maybe.accounts)) items = maybe.accounts as unknown[];
+      else if (Array.isArray(maybe.list)) items = maybe.list as unknown[];
+      else if (Array.isArray(maybe.results)) items = maybe.results as unknown[];
+      else if (Array.isArray(maybe.data)) items = maybe.data as unknown[];
       else {
         // If no array properties found, some APIs return an object mapping ids
         // to entries (e.g. { id1: {...}, id2: {...} }). In that case, use the
@@ -112,15 +122,18 @@ export class BankService {
         // Otherwise, fallback to the first property that is an array.
         let foundArray = false;
         for (const k of Object.keys(maybe)) {
-          if(Array.isArray(maybe[k])) {
+          if (Array.isArray(maybe[k])) {
             items = maybe[k] as unknown[];
             foundArray = true;
             break;
           }
         }
-        if(!foundArray) {
+        if (!foundArray) {
           const vals = Object.values(maybe);
-          if(vals.length > 0 && vals.every(v => v && typeof v === "object" && !Array.isArray(v))) {
+          if (
+            vals.length > 0 &&
+            vals.every((v) => v && typeof v === "object" && !Array.isArray(v))
+          ) {
             items = vals as unknown[];
           }
         }
@@ -130,19 +143,20 @@ export class BankService {
     return items;
   }
 
-
   /**
    * Get a specified bank account.
    * @param accountNumber Specify the account number it should load from.
    * @returns A BankAccount object with loaded data (if lazy mode is disabled - otherwise, they might be incomplete).
    */
   async get(accountNumber: string): Promise<BankAccount> {
-    const bankAccountLoaded = await BankAccount._create(accountNumber, this.#ctx);
+    const bankAccountLoaded = await BankAccount._create(
+      accountNumber,
+      this.#ctx,
+    );
     return bankAccountLoaded;
   }
 
   /**
-   * 
    * @returns A list of loaded BankAccount objects (if lazy mode is disabled - otherwise, they might be incomplete).
    */
   async listAll(): Promise<BankAccount[]> {
@@ -150,22 +164,28 @@ export class BankService {
 
     const data = await this.#ctx.fetchData({
       ctx: this.#ctx,
-      endpoint: "bank/list"
+      endpoint: "bank/list",
     });
     const items = this.extractItemsFromResponse(data);
 
     const result: BankAccount[] = [];
-    if(!Array.isArray(items)) {
-      throw new Error("Unexpected response shape from bank/list: expected an array or an object containing an array.");
+    if (!Array.isArray(items)) {
+      throw new Error(
+        "Unexpected response shape from bank/list: expected an array or an object containing an array.",
+      );
     }
 
     for (const item of items) {
       const itemResult = await BankAccountSchema.parseAsync(item);
-      if(this.#ctx.debug) console.debug(`BankAccountSchema successfully validated: ${JSON.stringify(itemResult)}`);
+      if (this.#ctx.debug) {
+        console.debug(
+          `BankAccountSchema successfully validated: ${
+            JSON.stringify(itemResult)
+          }`,
+        );
+      }
       result.push(BankAccount._fromSchema(itemResult, this.#ctx));
     }
     return result;
   }
-
-  
 }

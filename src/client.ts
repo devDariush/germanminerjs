@@ -8,10 +8,10 @@ import { BankAccount, BankService } from "./common/schemas/bank.ts";
 const MAX_CACHE_LIFETIME = 600_000;
 
 export type TClientOptions = {
-  apiKey?: string,
-  lazyMode?: boolean,
-  debugMode?: boolean
-}
+  apiKey?: string;
+  lazyMode?: boolean;
+  debugMode?: boolean;
+};
 /**
  * This class manages connections to the GermanMiner API.
  */
@@ -29,53 +29,53 @@ export class GMClient {
   constructor(options?: TClientOptions) {
     const { apiKey, lazyMode, debugMode } = options ?? {};
     // Store API key
-    if(apiKey) {
+    if (apiKey) {
       this.#apiKey = apiKey;
     } else {
       const apiKeyFromEnv = getApiKey();
-      if(!apiKeyFromEnv) {
-        throw new GmClientError("API key is required but not found in environment nor passed as an argument.");
+      if (!apiKeyFromEnv) {
+        throw new GmClientError(
+          "API key is required but not found in environment nor passed as an argument.",
+        );
       }
       this.#apiKey = apiKeyFromEnv;
     }
 
     // Set lazy mode
-    if(lazyMode) {
+    if (lazyMode) {
       this.LAZY = lazyMode;
-      console.log("Lazy mode activated for GMClient.")
+      console.log("Lazy mode activated for GMClient.");
     }
 
     // Set debug mode
-    if(debugMode) {
+    if (debugMode) {
       this.DEBUG = debugMode;
     } else {
       this.DEBUG = getDebugFlag();
     }
-    if(this.DEBUG) console.log("Debug mode activated for GMClient.");
+    if (this.DEBUG) console.log("Debug mode activated for GMClient.");
 
     console.log("GMClient successfully initialized! ^^'");
   }
-  
+
   /**
-   * 
    * @param apiKey Set the API key to be able to communicate to the API. If not set, it will automatically load from environment variables from either Node.js or Deno. If no API key is found, it will throw an error.
    * @param lazyMode If set to true, the client will save on API requests wherever possible. Some data might be missing, so you have to load them manually (see documentation).
    * @param debugMode If set to true, the client will produce more logs for debug purposes. If not set, it will check in environment variables or set to false.
    */
   static async create(options?: TClientOptions) {
     const client = new GMClient(options);
-    
-    // Before creating the client, 
+
+    // Before creating the client,
     const apiInfo = await client.getApiInfo(true);
     client.#REQ_LIMIT = apiInfo.limit;
     client.#requestCount = apiInfo.requests;
     client.#lastUpdated = Date.now();
-    
+
     return client;
   }
 
   /**
-   * 
    * @returns True if API request limit is reached (i.e. requests higher or equal to requests limit).
    */
   isLimitReached(): boolean {
@@ -83,7 +83,6 @@ export class GMClient {
   }
 
   /**
-   * 
    * @returns Gives you the number of requests that are currently remaining.
    */
   getRemainingRequests(): number {
@@ -96,11 +95,17 @@ export class GMClient {
 
   private async handleOperation(ignoreCache?: boolean): Promise<void> {
     this.#requestCount += 1;
-    if(!ignoreCache) {
-      if(this.isCacheOutdated()) await this.refreshCache();
-      if(this.isLimitReached()) throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
+    if (!ignoreCache) {
+      if (this.isCacheOutdated()) await this.refreshCache();
+      if (this.isLimitReached()) {
+        throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
+      }
     }
-    if(this.DEBUG) console.debug(`${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`);
+    if (this.DEBUG) {
+      console.debug(
+        `${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`,
+      );
+    }
   }
 
   private getContext(): ApiContext {
@@ -109,7 +114,7 @@ export class GMClient {
       fetchData: fetchData,
       handleOperation: this.handleOperation.bind(this),
       debug: this.DEBUG,
-      lazy: this.LAZY
+      lazy: this.LAZY,
     };
   }
 
@@ -121,17 +126,20 @@ export class GMClient {
   }
 
   /**
-   * 
    * @returns Gives you request limit, total requests and outstanding costs.
    */
   async getApiInfo(ignoreCache?: boolean): Promise<ApiInfo> {
     await this.handleOperation(ignoreCache);
     const ctx = this.getContext();
 
-    const data = await ctx.fetchData({ctx: ctx, endpoint: "api/info"});
-    
+    const data = await ctx.fetchData({ ctx: ctx, endpoint: "api/info" });
+
     const result = await ApiInfo.parseAsync(data);
-    if(this.DEBUG) console.debug(`ApiInfo successfully validated: ${JSON.stringify(result)}`);
+    if (this.DEBUG) {
+      console.debug(
+        `ApiInfo successfully validated: ${JSON.stringify(result)}`,
+      );
+    }
 
     return result;
   }
@@ -141,13 +149,12 @@ export class GMClient {
   bank(accountNumber?: string): BankService | Promise<BankAccount> {
     const ctx = this.getContext();
 
-    if(accountNumber) {
+    if (accountNumber) {
       return BankAccount._create(accountNumber, ctx);
     }
 
     return new BankService(ctx);
   }
-
 }
 
 export type ApiContext = {
