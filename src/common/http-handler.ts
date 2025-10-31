@@ -11,7 +11,7 @@ export type TFetchOptions = {
   baseUrl?: string;
 };
 
-async function buildQuery(
+function buildQuery(
   apiKey: string,
   endpoint: string,
   params?: Record<string, string>,
@@ -34,13 +34,13 @@ async function buildQuery(
 
   if (DEBUG) console.debug(`Query URL built: ${url.toString()}`);
 
-  return await url;
+  return url;
 }
 
 export async function fetchData(options: TFetchOptions) {
   const { ctx, endpoint, params, baseUrl } = options;
 
-  const url = await buildQuery(
+  const url = buildQuery(
     ctx.apiKey,
     endpoint,
     params,

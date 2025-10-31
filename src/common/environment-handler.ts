@@ -29,9 +29,7 @@ export function getDebugFlag(): boolean {
   } else if (isDeno()) {
     return Deno.env.get("DENO_ENV") === "development";
   } else {
-    return process.execArgv.some((arg: string | string[]) =>
-      arg.includes("--inspect") || arg.includes("--debug")
-    ) ?? false;
+    return false;
   }
 }
 
