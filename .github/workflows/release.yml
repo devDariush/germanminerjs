@@ -1,0 +1,38 @@
+name: Release and Publish
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*' # Triggers on semantic version tags (e.g., v1.0.0, v1.0.0-beta.1)
+
+permissions:
+  contents: read
+  id-token: write # Required for JSR OIDC authentication
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v5
+        
+      - name: 🛠️ Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: 🧹 Get Version from Tag
+        id: get_version
+        run: |
+          # Get the tag name (e.g., 'v1.2.3') and strip the leading 'v'
+          TAG=${{ github.ref_name }}
+          VERSION=$(echo $TAG | sed 's/^v//')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        
+      - name: 🚀 Publish to JSR
+        # Use the version extracted from the tag
+        run: |
+          echo "Publishing version ${{ steps.get_version.outputs.VERSION }}"
+          deno publish --version ${{ steps.get_version.outputs.VERSION }}
+        # Note: deno publish uses the OIDC token automatically because of 'id-token: write'
