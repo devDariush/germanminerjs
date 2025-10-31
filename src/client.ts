@@ -94,14 +94,20 @@ export class GMClient {
     return Date.now() - this.#lastUpdated > MAX_CACHE_LIFETIME;
   }
 
-  async _handleOperation(ignoreCache?: boolean): Promise<ApiContext> {
+  private async handleOperation(ignoreCache?: boolean): Promise<void> {
+    this.#requestCount += 1;
     if(!ignoreCache) {
       if(this.isCacheOutdated()) await this.refreshCache();
       if(this.isLimitReached()) throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
     }
+    if(this.DEBUG) console.debug(`${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`);
+  }
+
+  private getContext(): ApiContext {
     return {
       apiKey: this.#apiKey,
-      fetch: fetchData,
+      fetchData: fetchData,
+      handleOperation: this.handleOperation.bind(this),
       debug: this.DEBUG,
       lazy: this.LAZY
     };
@@ -119,9 +125,10 @@ export class GMClient {
    * @returns Gives you request limit, total requests and outstanding costs.
    */
   async getApiInfo(ignoreCache?: boolean): Promise<ApiInfo> {
-    const ctx = await this._handleOperation(ignoreCache);
+    await this.handleOperation(ignoreCache);
+    const ctx = this.getContext();
 
-    const data = await ctx.fetch({ctx: ctx, endpoint: "api/info"});
+    const data = await ctx.fetchData({ctx: ctx, endpoint: "api/info"});
     
     const result = await ApiInfo.parseAsync(data);
     if(this.DEBUG) console.debug(`ApiInfo successfully validated: ${JSON.stringify(result)}`);
@@ -129,22 +136,24 @@ export class GMClient {
     return result;
   }
 
-  async bank(accountNumber?: string): Promise<BankAccount | BankService> {
-    const ctx = await this._handleOperation();
+  bank(): BankService;
+  bank(accountNumber: string): Promise<BankAccount>;
+  bank(accountNumber?: string): BankService | Promise<BankAccount> {
+    const ctx = this.getContext();
 
     if(accountNumber) {
-      const result = await BankAccount._create(accountNumber, ctx);
-      
-      return result;
+      return BankAccount._create(accountNumber, ctx);
     }
 
     return new BankService(ctx);
   }
+
 }
 
 export type ApiContext = {
   apiKey: string;
-  fetch: typeof fetchData;
+  fetchData: typeof fetchData;
+  handleOperation: (ignoreCache?: boolean) => Promise<void>;
   debug: boolean;
   lazy: boolean;
 };

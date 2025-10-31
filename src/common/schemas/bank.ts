@@ -4,7 +4,7 @@ import type { ApiContext } from "../../client.ts";
 import type { Loadable } from "../loadable.ts";
 import type { Player } from "./player.ts";
 
-const accountTypes = ["Privatkonto", "Firmenkonto"] as const;
+const accountTypes = ["Privatkonto", "Firma"] as const;
 type BankAccountType = (typeof accountTypes)[number];
 type PlayerType = Player | string;
 
@@ -30,7 +30,7 @@ export class BankAccount implements Loadable {
   ): Promise<BankAccount> {
     const bankAccount = new BankAccount(accountNumber, ctx);
 
-    if (ctx.lazy === false) {
+    if(ctx.lazy === false) {
       const bankAccountLoaded = await bankAccount.load();
       return bankAccountLoaded;
     }
@@ -58,8 +58,10 @@ export class BankAccount implements Loadable {
   }
 
   async load(): Promise<BankAccount> {
+    await this.#ctx.handleOperation();
+
     const params = { "accountNumber": this.accountNumber };
-    const data = await this.#ctx.fetch({
+    const data = await this.#ctx.fetchData({
       ctx: this.#ctx,
       endpoint: "bank/info",
       params: params
@@ -70,6 +72,8 @@ export class BankAccount implements Loadable {
     this.accountType = result.accountType;
     this.bearer = result.bearer;
 
+    if(this.#ctx.debug) console.debug(`BankAccountSchema successfully validated: ${JSON.stringify(result)}`);
+
     return this;
   }
 }
@@ -79,6 +83,51 @@ export class BankService {
 
   constructor(ctx: ApiContext) {
     this.#ctx = ctx;
+  }
+
+  /**
+   * Normalize various API response shapes into a flat array of items.
+   * Accepts:
+   * - an array directly
+   * - an object containing an array under common keys (accounts, list, results, data)
+   * - an object map of id -> item (falls back to Object.values)
+   */
+  private extractItemsFromResponse(data: unknown): unknown[] {
+    // The API may return an array directly or an object containing an array under
+    // various keys (e.g. `accounts`, `list`, `data`). Be defensive and accept
+    // both shapes to avoid runtime "data is not iterable" errors.
+    let items: unknown[] = [];
+    if(Array.isArray(data)) {
+      items = data as unknown[];
+    } else if(data && typeof data === "object") {
+      const maybe = data as Record<string, unknown>;
+      if(Array.isArray(maybe.accounts)) items = maybe.accounts as unknown[];
+      else if(Array.isArray(maybe.list)) items = maybe.list as unknown[];
+      else if(Array.isArray(maybe.results)) items = maybe.results as unknown[];
+      else if(Array.isArray(maybe.data)) items = maybe.data as unknown[];
+      else {
+        // If no array properties found, some APIs return an object mapping ids
+        // to entries (e.g. { id1: {...}, id2: {...} }). In that case, use the
+        // object's values as the items list.
+        // Otherwise, fallback to the first property that is an array.
+        let foundArray = false;
+        for (const k of Object.keys(maybe)) {
+          if(Array.isArray(maybe[k])) {
+            items = maybe[k] as unknown[];
+            foundArray = true;
+            break;
+          }
+        }
+        if(!foundArray) {
+          const vals = Object.values(maybe);
+          if(vals.length > 0 && vals.every(v => v && typeof v === "object" && !Array.isArray(v))) {
+            items = vals as unknown[];
+          }
+        }
+      }
+    }
+
+    return items;
   }
 
 
@@ -97,13 +146,22 @@ export class BankService {
    * @returns A list of loaded BankAccount objects (if lazy mode is disabled - otherwise, they might be incomplete).
    */
   async listAll(): Promise<BankAccount[]> {
-    const data = await this.#ctx.fetch({
+    await this.#ctx.handleOperation();
+
+    const data = await this.#ctx.fetchData({
       ctx: this.#ctx,
       endpoint: "bank/list"
     });
+    const items = this.extractItemsFromResponse(data);
+
     const result: BankAccount[] = [];
-    for(const item of data) {
+    if(!Array.isArray(items)) {
+      throw new Error("Unexpected response shape from bank/list: expected an array or an object containing an array.");
+    }
+
+    for (const item of items) {
       const itemResult = await BankAccountSchema.parseAsync(item);
+      if(this.#ctx.debug) console.debug(`BankAccountSchema successfully validated: ${JSON.stringify(itemResult)}`);
       result.push(BankAccount._fromSchema(itemResult, this.#ctx));
     }
     return result;
