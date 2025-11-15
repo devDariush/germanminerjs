@@ -86,8 +86,8 @@ export class GMClient {
   /**
    * @returns Gives you the number of requests that are currently remaining.
    */
-  getRemainingRequests(): number {
-    this.refreshCache();
+  async getRemainingRequests(): Promise<number> {
+    await this.refreshCache();
     return this.#REQ_LIMIT - this.#requestCount;
   }
 
