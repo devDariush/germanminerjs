@@ -12,8 +12,8 @@ const isDeno = () =>
   typeof Deno.version !== "undefined" &&
   typeof Deno.version.deno !== "undefined";
 
-export function getApiKey(): string | null {
-  let apiKey = null;
+export function getApiKey(): string | undefined {
+  let apiKey: string | undefined;
   if (isNode()) {
     apiKey = process.env.GM_API_KEY ?? process.env.API_KEY;
   } else if (isDeno()) {
@@ -33,8 +33,8 @@ export function getDebugFlag(): boolean {
   }
 }
 
-export function getBaseUrl(): string | null {
-  let baseUrl = null;
+export function getBaseUrl(): string | undefined {
+  let baseUrl: string | undefined;
   if (isNode()) {
     baseUrl = process.env.GM_BASE_URL ?? process.env.BASE_URL;
   } else if (isDeno()) {
