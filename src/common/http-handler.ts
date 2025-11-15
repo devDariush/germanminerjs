@@ -16,7 +16,6 @@ function buildQuery(
   endpoint: string,
   params?: Record<string, string>,
   baseUrl?: string,
-  DEBUG?: boolean,
 ) {
   if (!baseUrl) baseUrl = defaultBaseUrl;
 
@@ -31,8 +30,6 @@ function buildQuery(
     }
   }
 
-  if (DEBUG) console.debug(`Query URL built: ${url.toString()}`);
-
   return url;
 }
 
@@ -45,7 +42,6 @@ export async function fetchData(options: TFetchOptions): Promise<any> {
     endpoint,
     params,
     baseUrl,
-    ctx.debug,
   );
 
   const response = await fetch(url);
