@@ -4,6 +4,7 @@ import { LimitReachedError } from "./common/errors/limit-reached-error.ts";
 import { fetchData } from "./common/http-handler.ts";
 import { ApiInfo as ApiInfo } from "./common/schemas/api-info.ts";
 import { BankAccount, BankService } from "./common/schemas/bank.ts";
+import { PlayerService } from "./common/schemas/player.ts";
 
 const MAX_CACHE_LIFETIME = 600_000;
 
@@ -155,6 +156,12 @@ export class GMClient {
     }
 
     return new BankService(ctx);
+  }
+
+  player(): PlayerService {
+    const ctx = this.getContext();
+
+    return new PlayerService(ctx);
   }
 }
 

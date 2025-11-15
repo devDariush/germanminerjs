@@ -1,11 +1,11 @@
 import * as z from "@zod/zod";
 
 import type { ApiContext } from "../../client.ts";
-import type { Player } from "./player.ts";
+import { Player } from "./player.ts";
 
 const accountTypes = ["Privatkonto", "Firma"] as const;
 type BankAccountType = (typeof accountTypes)[number];
-type PlayerType = Player | string;
+type BearerType = Player | string;
 
 export type BankAccountData = {
   accountNumber: string;
@@ -25,7 +25,7 @@ export class BankAccount {
   readonly accountNumber: string;
   balance?: number;
   accountType?: BankAccountType;
-  bearer?: PlayerType;
+  bearer?: BearerType;
 
   #ctx: ApiContext;
 
@@ -43,13 +43,20 @@ export class BankAccount {
     return bankAccount;
   }
 
-  static _fromSchema(schema: BankAccountData, ctx: ApiContext): BankAccount {
+  static async _fromSchema(
+    schema: BankAccountData,
+    ctx: ApiContext,
+  ): Promise<BankAccount> {
+    const bearer = (schema.accountType === "Privatkonto")
+      ? await Player._create(ctx, schema.bearer)
+      : schema.bearer;
+
     return new BankAccount(
       schema.accountNumber,
       ctx,
       schema.balance,
       schema.accountType,
-      schema.bearer,
+      bearer,
     );
   }
 
@@ -58,7 +65,7 @@ export class BankAccount {
     ctx: ApiContext,
     balance?: number,
     accountType?: BankAccountType,
-    bearer?: PlayerType,
+    bearer?: BearerType,
   ) {
     this.accountNumber = accountNumber;
     this.#ctx = ctx;
@@ -81,7 +88,9 @@ export class BankAccount {
     const result = await BankAccountSchema.parseAsync(data["account"]);
     this.balance = result.balance;
     this.accountType = result.accountType;
-    this.bearer = result.bearer;
+    this.bearer = (this.accountType === "Privatkonto")
+      ? await Player._create(this.#ctx, result.bearer)
+      : result.bearer;
 
     if (this.#ctx.debug) {
       console.debug(
@@ -148,7 +157,7 @@ export class BankService {
           }`,
         );
       }
-      result.push(BankAccount._fromSchema(itemResult, this.#ctx));
+      result.push(await BankAccount._fromSchema(itemResult, this.#ctx));
     }
 
     return result;
