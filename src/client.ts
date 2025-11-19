@@ -27,7 +27,7 @@ export class GMClient {
   #requestCount: number = 0;
   #lastUpdated: number = 0;
 
-  constructor(options?: ClientOptions) {
+  private constructor(options?: ClientOptions) {
     const { apiKey, lazyMode, debugMode } = options ?? {};
     // Store API key
     if (apiKey) {
