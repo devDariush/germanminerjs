@@ -49,7 +49,7 @@ export class Player {
   }
 
   private async _getUuidFromPlayername(playerName: string): Promise<string> {
-    this.#ctx.handleOperation();
+    await this.#ctx.handleOperation();
 
     const params = { "playername": playerName };
     const data = await this.#ctx.fetchData({
@@ -69,7 +69,7 @@ export class Player {
   }
 
   private async _getPlayernameFromUuid(uuid: string): Promise<string> {
-    this.#ctx.handleOperation();
+    await this.#ctx.handleOperation();
 
     const params = { "uuid": uuid };
     const data = await this.#ctx.fetchData({
