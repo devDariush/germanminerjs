@@ -3,7 +3,7 @@ import { ApiError } from "./errors/api-error.ts";
 
 const defaultBaseUrl = "https://api.germanminer.de/v2/";
 
-export type TFetchOptions = {
+export type FetchOptions = {
   ctx: ApiContext;
   endpoint: string;
   params?: Record<string, string>;
@@ -33,7 +33,7 @@ function buildQuery(
 }
 
 // deno-lint-ignore no-explicit-any
-export async function fetchData(options: TFetchOptions): Promise<any> {
+export async function fetchData(options: FetchOptions): Promise<any> {
   const { ctx, endpoint, params, baseUrl } = options;
 
   const url = buildQuery(

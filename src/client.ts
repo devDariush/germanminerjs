@@ -8,7 +8,7 @@ import { PlayerService } from "./common/schemas/player.ts";
 
 const MAX_CACHE_LIFETIME = 600_000;
 
-export type TClientOptions = {
+export type ClientOptions = {
   apiKey?: string;
   lazyMode?: boolean;
   debugMode?: boolean;
@@ -27,7 +27,7 @@ export class GMClient {
   #requestCount: number = 0;
   #lastUpdated: number = 0;
 
-  constructor(options?: TClientOptions) {
+  constructor(options?: ClientOptions) {
     const { apiKey, lazyMode, debugMode } = options ?? {};
     // Store API key
     if (apiKey) {
@@ -64,7 +64,7 @@ export class GMClient {
    * @param lazyMode If set to true, the client will save on API requests wherever possible. Some data might be missing, so you have to load them manually (see documentation).
    * @param debugMode If set to true, the client will produce more logs for debug purposes. If not set, it will check in environment variables or set to false.
    */
-  static async create(options?: TClientOptions): Promise<GMClient> {
+  static async create(options?: ClientOptions): Promise<GMClient> {
     const client = new GMClient(options);
 
     // Before creating the client,
