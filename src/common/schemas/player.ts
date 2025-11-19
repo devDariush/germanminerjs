@@ -1,3 +1,4 @@
+import * as z from "@zod/zod";
 import type { ApiContext } from "../../client.ts";
 import { ApiError } from "../errors/api-error.ts";
 import { GmClientError } from "../errors/client-error.ts";
@@ -58,14 +59,15 @@ export class Player {
       params: params,
     });
 
-    const uuid = String(data["uuid"]);
-    if (!uuid) {
+    const UuidResponse = z.object({ uuid: z.string().uuid() });
+    const parsed = await UuidResponse.safeParseAsync(data);
+    if (!parsed.success) {
       throw new ApiError(
-        `Couldn't fetch UUID from API for player name "${playerName}".`,
+        `Couldn't fetch a valid UUID from API for player name "${playerName}".`,
       );
     }
 
-    return uuid;
+    return parsed.data.uuid;
   }
 
   private async _getPlayernameFromUuid(uuid: string): Promise<string> {
@@ -78,14 +80,15 @@ export class Player {
       params: params,
     });
 
-    const playerName = String(data["playername"]);
-    if (!playerName) {
+    const PlayernameResponse = z.object({ playername: z.string().min(1) });
+    const parsed = await PlayernameResponse.safeParseAsync(data);
+    if (!parsed.success) {
       throw new ApiError(
-        `Couldn't fetch player name from API for UUID "${uuid}".`,
+        `Couldn't fetch a valid player name from API for UUID "${uuid}".`,
       );
     }
 
-    return playerName;
+    return parsed.data.playername;
   }
 }
 
