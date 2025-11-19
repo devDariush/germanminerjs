@@ -45,7 +45,7 @@ export class GMClient {
     // Set lazy mode
     if (lazyMode) {
       this.LAZY = lazyMode;
-      console.log("Lazy mode activated for GMClient.");
+      console.debug("Lazy mode activated for GMClient.");
     }
 
     // Set debug mode
@@ -54,9 +54,10 @@ export class GMClient {
     } else {
       this.DEBUG = getDebugFlag();
     }
-    if (this.DEBUG) console.log("Debug mode activated for GMClient.");
-
-    console.log("GMClient successfully initialized! ^^'");
+    if (this.DEBUG) {
+      console.debug("Debug mode activated for GMClient.");
+    }
+    console.debug("GMClient successfully initialized! ^^'");
   }
 
   /**
