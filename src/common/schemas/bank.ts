@@ -27,7 +27,7 @@ export class BankAccount {
   accountType?: BankAccountType;
   bearer?: BearerType;
 
-  #ctx: ApiContext;
+  readonly #ctx: ApiContext;
 
   static async _create(
     accountNumber: string,
@@ -111,7 +111,7 @@ export class BankAccount {
 }
 
 export class BankService {
-  #ctx: ApiContext;
+  readonly #ctx: ApiContext;
 
   constructor(ctx: ApiContext) {
     this.#ctx = ctx;

@@ -6,7 +6,7 @@ export class Player {
   playerName?: string;
   uuid?: string;
 
-  #ctx: ApiContext;
+  readonly #ctx: ApiContext;
 
   private constructor(ctx: ApiContext, playerName?: string, uuid?: string) {
     this.#ctx = ctx;
@@ -90,7 +90,7 @@ export class Player {
 }
 
 export class PlayerService {
-  #ctx: ApiContext;
+  readonly #ctx: ApiContext;
 
   constructor(ctx: ApiContext) {
     this.#ctx = ctx;
