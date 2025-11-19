@@ -96,17 +96,25 @@ export class GMClient {
   }
 
   private async handleOperation(ignoreCache?: boolean): Promise<void> {
+    // Not initialized yet — allow first info fetch without counting/checking.
+    if (this.#REQ_LIMIT === 0) {
+      return;
+    }
+
+    if (this.isLimitReached()) {
+      throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
+    }
+
+    if (!ignoreCache && this.isCacheOutdated()) {
+      await this.refreshCache();
+    }
+
     this.#requestCount += 1;
-    if (!ignoreCache) {
-      if (this.isCacheOutdated()) await this.refreshCache();
-      if (this.isLimitReached()) {
-        throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
-      }
-      if (this.DEBUG) {
-        console.debug(
-          `${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`,
-        );
-      }
+
+    if (this.DEBUG) {
+      console.debug(
+        `${this.#requestCount} out of ${this.#REQ_LIMIT} requests (+ 1 added).`,
+      );
     }
   }
 
