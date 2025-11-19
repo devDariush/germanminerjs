@@ -1,8 +1,7 @@
 import type { ApiContext } from "../client.ts";
-import { getBaseUrl } from "./environment-handler.ts";
 import { ApiError } from "./errors/api-error.ts";
 
-const defaultBaseUrl = getBaseUrl() ?? "https://api.germanminer.de/v2/";
+const defaultBaseUrl = "https://api.germanminer.de/v2/";
 
 export type TFetchOptions = {
   ctx: ApiContext;

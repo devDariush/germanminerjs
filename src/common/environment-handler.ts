@@ -32,14 +32,3 @@ export function getDebugFlag(): boolean {
     return false;
   }
 }
-
-export function getBaseUrl(): string | undefined {
-  let baseUrl: string | undefined;
-  if (isNode()) {
-    baseUrl = process.env.GM_BASE_URL ?? process.env.BASE_URL;
-  } else if (isDeno()) {
-    baseUrl = Deno.env.get("GM_BASE_URL") ?? Deno.env.get("BASE_URL");
-  }
-
-  return baseUrl;
-}
