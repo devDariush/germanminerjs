@@ -32,6 +32,21 @@ function buildQuery(
   return url;
 }
 
+function maskApiKey(key: string): string {
+  if (!key) return "***";
+  if (key.length <= 8) return "***";
+  return `${key.slice(0, 4)}…${key.slice(-4)}`;
+}
+
+function maskedUrlString(url: URL): string {
+  const masked = new URL(url.toString());
+  const key = masked.searchParams.get("key");
+  if (key) {
+    masked.searchParams.set("key", maskApiKey(key));
+  }
+  return masked.toString();
+}
+
 // deno-lint-ignore no-explicit-any
 export async function fetchData(options: FetchOptions): Promise<any> {
   const { ctx, endpoint, params, baseUrl } = options;
@@ -56,7 +71,7 @@ export async function fetchData(options: FetchOptions): Promise<any> {
 
   if (ctx.debug) {
     console.debug(
-      `Successfully fetched from ${url.toString()}:\n${
+      `Successfully fetched from ${maskedUrlString(url)}:\n${
         JSON.stringify(responseJson.data)
       }`,
     );

@@ -254,7 +254,7 @@ const client = await GMClient.create({ debugMode: true });
 // Will log:
 // - Request count updates
 // - Schema validation results
-// - Fetch operations and responses (CAUTION: includes the API key in DEBUG logs!!!)
+// - Fetch operations and responses (API key masked in DEBUG logs)
 // - ... and much more
 ```
 
