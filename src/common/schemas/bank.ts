@@ -85,7 +85,8 @@ export class BankAccount {
       params: params,
     });
 
-    const result = await BankAccountSchema.parseAsync(data["account"]);
+    const accountData = (data as { account: unknown }).account;
+    const result = await BankAccountSchema.parseAsync(accountData);
     this.balance = result.balance;
     this.accountType = result.accountType;
     this.bearer = (this.accountType === "Privatkonto")
@@ -146,7 +147,7 @@ export class BankService {
     // The endpoint returns an object keyed by account number, e.g.
     // { "ACC1": { accountNumber: "ACC1", ... }, "ACC2": { ... } }
     // Iterate over the values and validate each entry.
-    const items = Object.values(data ?? {});
+    const items = Object.values((data ?? {}) as Record<string, unknown>);
 
     for (const item of items) {
       const itemResult = await BankAccountSchema.parseAsync(item);
