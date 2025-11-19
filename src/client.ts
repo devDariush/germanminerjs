@@ -101,12 +101,12 @@ export class GMClient {
       return;
     }
 
-    if (this.isLimitReached()) {
-      throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
-    }
-
     if (!ignoreCache && this.isCacheOutdated()) {
       await this.refreshCache();
+    }
+
+    if (this.isLimitReached()) {
+      throw new LimitReachedError(this.#requestCount, this.#REQ_LIMIT);
     }
 
     this.#requestCount += 1;
