@@ -96,13 +96,13 @@ export class PlayerService {
     this.#ctx = ctx;
   }
 
-  async fromPlayername(playerName: string) {
+  async fromPlayername(playerName: string): Promise<Player> {
     const ctx = Object.assign({}, this.#ctx, { lazy: false });
     const player = await Player._create(ctx, playerName);
     return player;
   }
 
-  async fromUuid(uuid: string) {
+  async fromUuid(uuid: string): Promise<Player> {
     const ctx = Object.assign({}, this.#ctx, { lazy: false });
     const player = await Player._create(ctx, undefined, uuid);
     return player;
