@@ -92,6 +92,14 @@ export class GMClient {
     return this.#REQ_LIMIT - this.#requestCount;
   }
 
+  /**
+   * Warning: This method uses the cache and data might be stale.
+   * @returns Gives you the number of requests that are currently remaining.
+   */
+  getCachedRemainingRequests(): number {
+    return this.#REQ_LIMIT - this.#requestCount;
+  }
+
   private isCacheOutdated(): boolean {
     return Date.now() - this.#lastUpdated > MAX_CACHE_LIFETIME;
   }
