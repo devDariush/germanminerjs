@@ -1,0 +1,25 @@
+{
+    "name": "Deno (Podman)",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    // --- PODMAN ESSENTIALS ---
+    "runArgs": [
+        "--userns=keep-id"
+    ],
+    "remoteUser": "vscode",
+    "containerUser": "vscode",
+    // --- VS CODE SETUP ---
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "denoland.vscode-deno"
+            ],
+            "settings": {
+                "deno.enable": true,
+                "deno.lint": true
+            }
+        }
+    }
+}
