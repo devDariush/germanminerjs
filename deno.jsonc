@@ -2,13 +2,15 @@
   "name": "@devdariush/germanminerjs",
   "description": "Advanced TypeScript-first library for the GermanMiner API",
   "version": "0.0.0",
-
   "license": "AGPL-3.0",
   "author": "Dariush Komeili",
-
   "repository": "https://github.com/devDariush/germanminerjs",
-  "keywords": ["germanminerjs", "germanminer", "minecraft", "gm"],
-
+  "keywords": [
+    "germanminerjs",
+    "germanminer",
+    "minecraft",
+    "gm"
+  ],
   // INCLUDE files and directories (optional, use if you need to override defaults)
   "include": [
     "./src/**/*.ts", // Include all source files
@@ -16,34 +18,30 @@
     "LICENSE", // Explicitly include the LICENSE
     "assets" // Include specific asset files
   ],
-
   "exclude": [
     "**/test/",
     "coverage/",
     "*.log",
     "*.env"
   ],
-
   "exports": "./src/mod.ts",
-
   "tasks": {
     "dev": "deno run --watch --allow-net --allow-env --env-file main.ts"
   },
   "fmt": {
-    "include": [
-      "./src",
-      "./*.ts"
-    ],
-    "exclude": [
-      "coverage",
-      "node_modules"
-    ]
+    "indentWidth": 2,
+    "lineWidth": 100
   },
-
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
   "imports": {
+    "@std/expect": "jsr:@std/expect@^1.0.17",
+    "@std/testing": "jsr:@std/testing@^1.0.16",
     "@zod/zod": "jsr:@zod/zod@^4.1.12"
   },
-
   "compilerOptions": {
     "lib": [
       "deno.ns", // For Deno-specific APIs (if you use them)
