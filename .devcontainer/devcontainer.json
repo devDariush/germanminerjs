@@ -1,17 +1,12 @@
 {
-    "name": "Deno (Podman)",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "context": ".."
+    "name": "Deno",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu26.04",
+    "features": {
+        "ghcr.io/devcontainers-community/features/deno:1": {}
     },
-    // --- PODMAN ESSENTIALS ---
-    "runArgs": [
-        "--userns=keep-id"
-    ],
-    "remoteUser": "vscode",
-    "containerUser": "vscode",
-    // --- VS CODE SETUP ---
+    "postCreateCommand": "deno install",
     "customizations": {
+        // --- VS CODE SETUP ---
         "vscode": {
             "extensions": [
                 "denoland.vscode-deno"
